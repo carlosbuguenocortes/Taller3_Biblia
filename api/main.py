@@ -423,9 +423,21 @@ def top_words():
         "á","no","para","porque",
         "él","tu","es","lo",
         "como","mi","sobre",
-        "yo","mas","ellos"
-    }
+        "yo","mas","ellos",
+        "le","me","he","ni",
+        "si","ha","te","sus",
+        "fue","os","fué","así",
+        "tus","dijo","pues","será",
+        "tú","todo","todos","cual",
+        "hasta","cuando","vosotros",
+        "contra","aquí","mí","ti",
+        "había","delante","entonces",
+        "toda","todas","qué","está",
+        "diciendo","también","están",
+        "ella","mis","más","entre",
+        "son","les","esto","este"
 
+    }
 
     words = [
         w for w in words
@@ -617,9 +629,6 @@ def generate_trigram(
     return {
         "text": " ".join(generated)
     }
-
-
-
 
 @app.get("/test-word2vec")
 def test_word2vec():
