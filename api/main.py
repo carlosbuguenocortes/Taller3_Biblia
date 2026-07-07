@@ -1,12 +1,13 @@
 from fastapi import FastAPI
-from services.data_loader import load_bible
+from api.services.data_loader import load_bible
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import PCA
 from collections import Counter
 import re
 import random
-
+from gensim.models import Word2Vec
+import numpy as np
 
 app = FastAPI()
 
@@ -261,6 +262,122 @@ def pca_3d():
         })
 
     return result
+@app.get("/word2vec-2d")
+def word2vec_2d():
+
+    df = load_bible()
+
+    sample = df.sample(
+        min(500, len(df)),
+        random_state=42
+    )
+
+    sentences = [
+        str(text).lower().split()
+        for text in sample["Text"]
+    ]
+
+    model = Word2Vec(
+        sentences,
+        vector_size=50,
+        window=5,
+        min_count=1
+    )
+
+    embeddings = []
+
+    for sentence in sentences:
+
+        vectors = [
+            model.wv[word]
+            for word in sentence
+        ]
+
+        embeddings.append(
+            np.mean(vectors, axis=0)
+        )
+
+    embeddings = np.array(embeddings)
+
+    pca = PCA(
+        n_components=2
+    )
+
+    coords = pca.fit_transform(
+        embeddings
+    )
+
+    result = []
+
+    for i, row in enumerate(sample.itertuples()):
+
+        result.append({
+            "x": float(coords[i][0]),
+            "y": float(coords[i][1]),
+            "book": row._2,
+            "text": str(row.Text)[:100]
+        })
+
+    return result
+
+@app.get("/word2vec-3d")
+def word2vec_3d():
+
+    df = load_bible()
+
+    sample = df.sample(
+        min(500, len(df)),
+        random_state=42
+    )
+
+    sentences = [
+        str(text).lower().split()
+        for text in sample["Text"]
+    ]
+
+    model = Word2Vec(
+        sentences,
+        vector_size=50,
+        window=5,
+        min_count=1
+    )
+
+    embeddings = []
+
+    for sentence in sentences:
+
+        vectors = [
+            model.wv[word]
+            for word in sentence
+        ]
+
+        embeddings.append(
+            np.mean(vectors, axis=0)
+        )
+
+    embeddings = np.array(embeddings)
+
+    pca = PCA(
+        n_components=3
+    )
+
+    coords = pca.fit_transform(
+        embeddings
+    )
+
+    result = []
+
+    for i, row in enumerate(sample.itertuples()):
+
+        result.append({
+            "x": float(coords[i][0]),
+            "y": float(coords[i][1]),
+            "z": float(coords[i][2]),
+            "book": row._2,
+            "text": str(row.Text)[:100]
+        })
+
+    return result
 
 @app.get("/avg-verse-length")
 def avg_verse_length():
@@ -499,4 +616,26 @@ def generate_trigram(
 
     return {
         "text": " ".join(generated)
+    }
+
+
+
+
+@app.get("/test-word2vec")
+def test_word2vec():
+
+    sentences = [
+        ["dios", "ama"],
+        ["jesus", "salva"]
+    ]
+
+    model = Word2Vec(
+        sentences,
+        vector_size=10,
+        min_count=1
+    )
+
+    return {
+        "ok": True,
+        "vector_size": len(model.wv["dios"])
     }

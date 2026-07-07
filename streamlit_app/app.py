@@ -5,6 +5,7 @@ import plotly.express as px
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+from gensim.models import Word2Vec
 
 
 st.title(" Dashboard Biblia")
@@ -328,6 +329,58 @@ fig3d = px.scatter_3d(
 
 st.plotly_chart(
     fig3d,
+    use_container_width=True
+)
+
+st.divider()
+
+st.header(" Word2Vec")
+st.subheader(" Word2Vec 2D")
+
+w2v_data = requests.get(
+    "http://127.0.0.1:8000/word2vec-2d"
+).json()
+
+df_w2v = pd.DataFrame(
+    w2v_data
+)
+
+fig_w2v = px.scatter(
+    df_w2v,
+    x="x",
+    y="y",
+    color="book",
+    hover_data=["text"],
+    title="Word2Vec 2D"
+)
+
+st.plotly_chart(
+    fig_w2v,
+    use_container_width=True
+)
+
+st.subheader(" Word2Vec 3D")
+
+w2v_data_3d = requests.get(
+    "http://127.0.0.1:8000/word2vec-3d"
+).json()
+
+df_w2v3d = pd.DataFrame(
+    w2v_data_3d
+)
+
+fig_w2v3d = px.scatter_3d(
+    df_w2v3d,
+    x="x",
+    y="y",
+    z="z",
+    color="book",
+    hover_data=["text"],
+    title="Word2Vec 3D"
+)
+
+st.plotly_chart(
+    fig_w2v3d,
     use_container_width=True
 )
 
